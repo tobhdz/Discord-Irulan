@@ -104,9 +104,8 @@ client.on('interactionCreate', async (interaction) => {
       const embed = new EmbedBuilder()
         .setColor(0xC9A227)
         .setAuthor({ name: 'Irulan', iconURL: client.user.displayAvatarURL() })
-        .setTitle('Respuesta')
-        .setDescription(respuesta)
-        .setFooter({ text: `Pregunta de ${interaction.user.username}` })
+        .setTitle(`${interaction.user.username} pregunta:`)
+        .setDescription(`> *${pregunta}*\n\n${respuesta}`)
         .setTimestamp();
 
       await interaction.editReply({ embeds: [embed] });
@@ -121,7 +120,8 @@ client.on('interactionCreate', async (interaction) => {
 
         if (i === 0) {
           embed.setAuthor({ name: 'Irulan', iconURL: client.user.displayAvatarURL() });
-          embed.setTitle('Respuesta');
+          embed.setTitle(`${interaction.user.username} pregunta:`);
+          embed.setDescription(`> *${pregunta}*\n\n${chunks[i]}`);
           await interaction.editReply({ embeds: [embed] });
         } else {
           await interaction.followUp({ embeds: [embed] });
