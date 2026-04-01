@@ -117,12 +117,13 @@ client.on('interactionCreate', async (interaction) => {
       }
     }
   } catch (error) {
-    console.error('Error al consultar Gemini:', error.message);
+    console.error('Error al consultar Gemini:', error);
 
+    const errorDetail = error.message || String(error);
     const errorEmbed = new EmbedBuilder()
       .setColor(0xFF0000)
       .setTitle('Error')
-      .setDescription('No pude obtener una respuesta. Intenta de nuevo mas tarde.')
+      .setDescription(`No pude obtener una respuesta.\n\`\`\`${errorDetail.substring(0, 1000)}\`\`\``)
       .setTimestamp();
 
     await interaction.editReply({ embeds: [errorEmbed] });
