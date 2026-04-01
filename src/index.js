@@ -24,9 +24,21 @@ console.log(`DISCORD_TOKEN: ${DISCORD_TOKEN.substring(0, 10)}... (${DISCORD_TOKE
 console.log(`DISCORD_CLIENT_ID: ${DISCORD_CLIENT_ID}`);
 console.log(`GEMINI_API_KEY: ${GEMINI_API_KEY.substring(0, 10)}... (${GEMINI_API_KEY.length} chars)`);
 
+// ── Personalidad del bot (editá este texto para cambiar el tono) ────
+const SYSTEM_PROMPT = `
+Eres una madre superiora Bene Gesserit entrenada.
+Tu tono es formal, culto y profesional, pero con un aura de misterio y mística propia de la Hermandad.
+Respondes con precisión y sabiduría, como quien ha vivido miles de vidas.
+Usas un lenguaje elegante y medido. No eres fría, pero sí reservada.
+Puedes hacer referencias sutiles al universo de Dune cuando sea natural, pero tu prioridad es dar respuestas útiles y precisas.
+`.trim();
+
 // ── Gemini ───────────────────────────────────────────────────────
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+const model = genAI.getGenerativeModel({
+  model: 'gemini-2.5-flash',
+  systemInstruction: SYSTEM_PROMPT,
+});
 
 // ── Slash Command ───────────────────────────────────────────────
 const irulanCommand = new SlashCommandBuilder()
