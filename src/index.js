@@ -2,14 +2,27 @@ const { Client, GatewayIntentBits, EmbedBuilder, SlashCommandBuilder, REST, Rout
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 // ── Configuración ───────────────────────────────────────────────
-const DISCORD_TOKEN = process.env.DISCORD_TOKEN;
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID;
+// Limpiar tokens de espacios/saltos de línea que Railway puede agregar
+const DISCORD_TOKEN = (process.env.DISCORD_TOKEN || '').trim();
+const GEMINI_API_KEY = (process.env.GEMINI_API_KEY || '').trim();
+const DISCORD_CLIENT_ID = (process.env.DISCORD_CLIENT_ID || '').trim();
 
-if (!DISCORD_TOKEN || !GEMINI_API_KEY || !DISCORD_CLIENT_ID) {
-  console.error('Faltan variables de entorno: DISCORD_TOKEN, DISCORD_CLIENT_ID y/o GEMINI_API_KEY');
+if (!DISCORD_TOKEN) {
+  console.error('ERROR: DISCORD_TOKEN no esta definido o esta vacio.');
   process.exit(1);
 }
+if (!GEMINI_API_KEY) {
+  console.error('ERROR: GEMINI_API_KEY no esta definido o esta vacio.');
+  process.exit(1);
+}
+if (!DISCORD_CLIENT_ID) {
+  console.error('ERROR: DISCORD_CLIENT_ID no esta definido o esta vacio.');
+  process.exit(1);
+}
+
+console.log(`DISCORD_TOKEN: ${DISCORD_TOKEN.substring(0, 10)}... (${DISCORD_TOKEN.length} chars)`);
+console.log(`DISCORD_CLIENT_ID: ${DISCORD_CLIENT_ID}`);
+console.log(`GEMINI_API_KEY: ${GEMINI_API_KEY.substring(0, 10)}... (${GEMINI_API_KEY.length} chars)`);
 
 // ── Gemini ───────────────────────────────────────────────────────
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
@@ -43,7 +56,7 @@ client.once('ready', async () => {
       );
       console.log(`Comando /irulan registrado en: ${guild.name}`);
     } catch (error) {
-      console.error(`Error registrando en ${guild.name}:`, error);
+      console.error(`Error registrando en ${guild.name}:`, error.message);
     }
   }
 });
@@ -58,7 +71,7 @@ client.on('guildCreate', async (guild) => {
     );
     console.log(`Comando /irulan registrado en nuevo server: ${guild.name}`);
   } catch (error) {
-    console.error(`Error registrando en ${guild.name}:`, error);
+    console.error(`Error registrando en ${guild.name}:`, error.message);
   }
 });
 
@@ -69,7 +82,6 @@ client.on('interactionCreate', async (interaction) => {
 
   const pregunta = interaction.options.getString('pregunta');
 
-  // Defer para dar tiempo a Gemini de responder
   await interaction.deferReply();
 
   try {
@@ -105,12 +117,12 @@ client.on('interactionCreate', async (interaction) => {
       }
     }
   } catch (error) {
-    console.error('Error al consultar Gemini:', error);
+    console.error('Error al consultar Gemini:', error.message);
 
     const errorEmbed = new EmbedBuilder()
       .setColor(0xFF0000)
       .setTitle('Error')
-      .setDescription('No pude obtener una respuesta de Gemini. Intenta de nuevo mas tarde.')
+      .setDescription('No pude obtener una respuesta. Intenta de nuevo mas tarde.')
       .setTimestamp();
 
     await interaction.editReply({ embeds: [errorEmbed] });
@@ -144,4 +156,8 @@ function splitText(text, maxLength) {
 }
 
 // ── Iniciar ─────────────────────────────────────────────────────
-client.login(DISCORD_TOKEN);
+client.login(DISCORD_TOKEN).catch((err) => {
+  console.error('ERROR al conectar con Discord:', err.message);
+  console.error('Verifica que DISCORD_TOKEN sea correcto.');
+  process.exit(1);
+});
